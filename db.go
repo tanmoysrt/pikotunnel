@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type PeerStatus string
@@ -47,7 +48,9 @@ var (
 func GetDB() *gorm.DB {
 	once.Do(func() {
 		var err error
-		db, err = gorm.Open(sqlite.Open("pikotunnel.db"), &gorm.Config{})
+		db, err = gorm.Open(sqlite.Open("pikotunnel.db"), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
 		if err != nil {
 			panic("failed to connect database")
 		}

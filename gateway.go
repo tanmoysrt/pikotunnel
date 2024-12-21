@@ -90,35 +90,35 @@ func initialSetup() {
 func addWireguardPeer(peerPublicKey string, peerWireguardIP string) {
 	_, err := runWireguardCommand(nil, "set", "wg0", "peer", peerPublicKey, "allowed-ips", peerWireguardIP+"/32")
 	if err != nil {
-		log.Println("[ERROR] Failed to add wireguard peer", err)
+		log.Printf("[ERROR] Failed to add wireguard peer (%s): %s", peerPublicKey, err)
 	}
 }
 
 func removeWireguardPeer(peerPublicKey string) {
 	_, err := runWireguardCommand(nil, "set", "wg0", "peer", peerPublicKey, "remove")
 	if err != nil {
-		log.Println("[ERROR] Failed to remove wireguard peer", err)
+		log.Printf("[ERROR] Failed to remove wireguard peer (%s): %s", peerPublicKey, err)
 	}
 }
 
 func addIptablesRuleBetweenPeers(peerAIP string, peerBIP string) {
 	err := exec.Command("iptables", "-I", "WG_RULES", "1", "-s", peerAIP, "-d", peerBIP, "-i", "wg0", "-o", "wg0", "-j", "ACCEPT").Run()
 	if err != nil {
-		log.Println("[ERROR] Failed to add iptables rule between peers", err)
+		log.Printf("[ERROR] Failed to add iptables rule between peers (%s -> %s): %s", peerAIP, peerBIP, err)
 	}
 	err = exec.Command("iptables", "-I", "WG_RULES", "1", "-s", peerBIP, "-d", peerAIP, "-i", "wg0", "-o", "wg0", "-j", "ACCEPT").Run()
 	if err != nil {
-		log.Println("[ERROR] Failed to add iptables rule between peers", err)
+		log.Printf("[ERROR] Failed to add iptables rule between peers (%s -> %s): %s", peerBIP, peerAIP, err)
 	}
 }
 
 func removeIptablesRuleBetweenPeers(peerAIP string, peerBIP string) {
 	err := exec.Command("iptables", "-D", "WG_RULES", "-s", peerAIP, "-d", peerBIP, "-i", "wg0", "-o", "wg0", "-j", "ACCEPT").Run()
 	if err != nil {
-		log.Println("[ERROR] Failed to remove iptables rule between peers", err)
+		log.Printf("[ERROR] Failed to remove iptables rule between peers (%s -> %s): %s", peerAIP, peerBIP, err)
 	}
 	err = exec.Command("iptables", "-D", "WG_RULES", "-s", peerBIP, "-d", peerAIP, "-i", "wg0", "-o", "wg0", "-j", "ACCEPT").Run()
 	if err != nil {
-		log.Println("[ERROR] Failed to remove iptables rule between peers", err)
+		log.Printf("[ERROR] Failed to remove iptables rule between peers (%s -> %s): %s", peerBIP, peerAIP, err)
 	}
 }

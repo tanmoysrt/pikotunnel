@@ -17,8 +17,8 @@ func main() {
 	checkForToolInEnvironment("wg")
 	checkForToolInEnvironment("iptables")
 	checkForToolInEnvironment("ip")
+	
 	loadConfig()
-
 	initialSetup()
 
 	go startServer()
