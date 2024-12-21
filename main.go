@@ -1,15 +1,28 @@
 package main
 
+import (
+	"log"
+	"os"
+	"sync"
+)
+
+var globalWaitGroup = sync.WaitGroup{}
+
 func main() {
+	// check for root
+	if os.Geteuid() != 0 {
+		log.Fatal("Please run as root")
+	}
+
 	checkForToolInEnvironment("wg")
 	checkForToolInEnvironment("iptables")
 	checkForToolInEnvironment("ip")
 	loadConfig()
 
-	startServer()
+	initialSetup()
 
-	// fmt.Println(getUniqueIPInSubnet())
-	// fmt.Println("Hello, World!")
-	// fmt.Println(generateWireguardPrivateKey())
-	// fmt.Print(generateWireguardPublicKey("oFXuPHkynqyw6XPxghrfauPBe1575q7zx7ozdMPa00c="))
+	go startServer()
+	go runWorkers()
+
+	globalWaitGroup.Wait()
 }
