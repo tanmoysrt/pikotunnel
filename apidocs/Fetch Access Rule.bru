@@ -1,0 +1,16 @@
+meta {
+  name: Fetch Access Rule
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{base_url}}/access-rule/:peer_a_id/:peer_b_id
+  body: none
+  auth: none
+}
+
+params:path {
+  peer_a_id: f
+  peer_b_id: j
+}

@@ -1,0 +1,16 @@
+meta {
+  name: Create Access Rule
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{base_url}}/access-rule/:peer_a_id/:peer_b_id
+  body: none
+  auth: none
+}
+
+params:path {
+  peer_a_id: 33dad1c9-6725-464b-8baf-97cde2042b5d
+  peer_b_id: deefef00-f174-43a8-adb8-3236caecff11
+}
