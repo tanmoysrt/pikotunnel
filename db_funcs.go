@@ -14,6 +14,12 @@ func GetPeer(peerID string) (*Peer, error) {
 	return &peer, err
 }
 
+func GetPeerIP(peerID string) (string, error) {
+	var peer Peer
+	err := GetDB().First(&peer, "id = ?", peerID).Select("ip").Error
+	return peer.IP, err
+}
+
 func GetPeerStatus(peerID string) (PeerStatus, error) {
 	var peer Peer
 	err := GetDB().First(&peer, "id = ?", peerID).Select("status").Error
@@ -44,15 +50,28 @@ func CreatePeer() (*Peer, error) {
 		Status:     PeerStatusPending,
 	}
 	err = GetDB().Create(peer).Error
+	if err == nil {
+		workerQueueChannel <- QueueJob{Type: "peer", ID: peer.ID}
+	}
 	return peer, err
 }
 
 func UpdatePeerStatus(peerID string, status PeerStatus) error {
-	return GetDB().Model(&Peer{}).Where("id = ?", peerID).Update("status", status).Error
+	err := GetDB().Model(&Peer{}).Where("id = ?", peerID).Update("status", status).Error
+	if err == nil && status == PeerStatusDeleting {
+		workerQueueChannel <- QueueJob{Type: "peer", ID: peerID}
+	}
+	return err
 }
 
 func DeletePeer(peerID string) error {
 	return GetDB().Delete(&Peer{}, peerID).Error
+}
+
+func GetAccessRuleByID(id string) (*AccessRule, error) {
+	var accessRule AccessRule
+	err := GetDB().First(&accessRule, "id = ?", id).Error
+	return &accessRule, err
 }
 
 func GetAccessRule(peerAID, peerBID string) (*AccessRule, error) {
@@ -70,6 +89,12 @@ func GetAccessRule(peerAID, peerBID string) (*AccessRule, error) {
 		return nil, err
 	}
 	return &accessRule, nil
+}
+
+func GetAccessRulesByPeerID(peerID string) ([]AccessRule, error) {
+	var accessRules []AccessRule
+	err := GetDB().Find(&accessRules, "peer_a_id = ? OR peer_b_id = ?", peerID, peerID).Error
+	return accessRules, err
 }
 
 func IsAccessRuleExist(peerAID, peerBID string) (bool, error) {
@@ -117,6 +142,9 @@ func CreateAccessRule(peerAID, peerBID string) (*AccessRule, error) {
 		Status:  AccessRuleStatusPending,
 	}
 	err = GetDB().Create(accessRule).Error
+	if err == nil {
+		workerQueueChannel <- QueueJob{Type: "access_rule", ID: accessRule.ID}
+	}
 	return accessRule, err
 }
 

@@ -17,9 +17,10 @@ func main() {
 	checkForToolInEnvironment("wg")
 	checkForToolInEnvironment("iptables")
 	checkForToolInEnvironment("ip")
-	
+
 	loadConfig()
 	initialSetup()
+	queuePendingTasks()
 
 	go startServer()
 	go runWorkers()
