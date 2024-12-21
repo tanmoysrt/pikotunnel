@@ -87,6 +87,28 @@ func initialSetup() {
 	log.Println("[DONE] Initial setup")
 }
 
+func prepareServer() {
+	// add peers
+	var createdPeers []Peer
+	err := GetDB().Find(&createdPeers, "status = ?", PeerStatusCreated).Error
+	if err != nil {
+		panic(err)
+	}
+	for _, peer := range createdPeers {
+		addWireguardPeer(peer.PublicKey, peer.IP)
+	}
+
+	// add access rules
+	var createdAccessRules []AccessRule
+	err = GetDB().Find(&createdAccessRules, "status = ?", AccessRuleStatusCreated).Error
+	if err != nil {
+		panic(err)
+	}
+	for _, accessRule := range createdAccessRules {
+		addIptablesRuleBetweenPeers(accessRule.PeerAID, accessRule.PeerBID)
+	}
+}
+
 func addWireguardPeer(peerPublicKey string, peerWireguardIP string) {
 	_, err := runWireguardCommand(nil, "set", "wg0", "peer", peerPublicKey, "allowed-ips", peerWireguardIP+"/32")
 	if err != nil {

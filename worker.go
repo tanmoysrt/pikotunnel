@@ -10,7 +10,6 @@ type QueueJob struct {
 var workerQueueChannel = make(chan QueueJob)
 
 func runWorkers() {
-	globalWaitGroup.Add(1)
 	process()
 	globalWaitGroup.Done()
 }

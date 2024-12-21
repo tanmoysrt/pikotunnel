@@ -20,9 +20,12 @@ func main() {
 
 	loadConfig()
 	initialSetup()
+	prepareServer()
 	queuePendingTasks()
 
+	globalWaitGroup.Add(1)
 	go startServer()
+	globalWaitGroup.Add(1)
 	go runWorkers()
 
 	globalWaitGroup.Wait()

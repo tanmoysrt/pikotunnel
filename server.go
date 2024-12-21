@@ -18,7 +18,6 @@ type AccessRuleRequest struct {
 }
 
 func startServer() {
-	globalWaitGroup.Add(1)
 	e := echo.New()
 	e.HideBanner = true
 
