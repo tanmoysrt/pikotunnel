@@ -28,6 +28,7 @@ func startServer() {
 
 	e.POST("/access-rule/:peer_a_id/:peer_b_id", createAccessRule)
 	e.GET("/access-rule/:peer_a_id/:peer_b_id", getAccessRule)
+	e.DELETE("/access-rule/:peer_a_id/:peer_b_id", deleteAccessRule)
 
 	if err := e.Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		e.Logger.Fatal(err)
@@ -176,4 +177,35 @@ func getAccessRule(c echo.Context) error {
 		"peer_b_id": rule.PeerBID,
 		"status":    string(rule.Status),
 	})
+}
+
+func deleteAccessRule(c echo.Context) error {
+	peerAID := c.Param("peer_a_id")
+	peerBID := c.Param("peer_b_id")
+	rule, err := GetAccessRule(peerAID, peerBID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Access rule not found",
+		})
+	}
+	peerAIP, err := GetPeerIP(rule.PeerAID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+	peerBIP, err := GetPeerIP(rule.PeerBID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+	removeIptablesRuleBetweenPeers(peerAIP, peerBIP)
+	err = DeleteAccessRule(rule.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+	return c.NoContent(http.StatusNoContent)
 }
