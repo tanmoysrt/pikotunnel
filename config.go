@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	APIToken                     string `json:"api_token"`
 	WireguardSubnet              string `json:"wireguard_subnet"`
 	WireguardRelayServerPublicIP string `json:"wireguard_relay_server_public_ip"`
 	WireguardListenPort          int    `json:"wireguard_listen_port"`
@@ -45,7 +46,7 @@ func loadConfig() {
 	encoder.Encode(config)
 
 	// check if config.json is empty
-	if config.WireguardSubnet == "" || config.WireguardRelayServerPublicIP == "" || config.WireguardListenPort == 0 || config.WireguardPrivateKey == "" || config.WireguardPublicKey == "" {
+	if config.APIToken == "" || config.WireguardSubnet == "" || config.WireguardRelayServerPublicIP == "" || config.WireguardListenPort == 0 || config.WireguardPrivateKey == "" || config.WireguardPublicKey == "" {
 		log.Println("Config.json is empty, please fill in the required fields")
 		os.Exit(1)
 	}

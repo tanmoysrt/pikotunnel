@@ -17,6 +17,17 @@ func startServer() {
 	e := echo.New()
 	e.HideBanner = true
 
+	// Auth middleware
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			token := c.Request().Header.Get("Authorization")
+			if token != config.APIToken {
+				return c.JSON(http.StatusUnauthorized, "Unauthorized")
+			}
+			return next(c)
+		}
+	})
+
 	// Register routes
 	e.POST("/peers", createPeer)
 	e.GET("/peers", getPeers)
