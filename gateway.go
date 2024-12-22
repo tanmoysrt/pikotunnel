@@ -106,7 +106,17 @@ func prepareServer() {
 		panic(err)
 	}
 	for _, accessRule := range createdAccessRules {
-		addIptablesRuleBetweenPeers(accessRule.PeerAID, accessRule.PeerBID)
+		peerAIP, err := GetPeerIP(accessRule.PeerAID)
+		if err != nil {
+			log.Printf("[ERROR] Error getting peer %s IP: %s", accessRule.PeerAID, err)
+			continue
+		}
+		peerBIP, err := GetPeerIP(accessRule.PeerBID)
+		if err != nil {
+			log.Printf("[ERROR] Error getting peer %s IP: %s", accessRule.PeerBID, err)
+			continue
+		}
+		addIptablesRuleBetweenPeers(peerAIP, peerBIP)
 	}
 	log.Println("[DONE] Added access rules")
 }
