@@ -44,11 +44,13 @@ var (
 	once sync.Once
 )
 
+const dbPath = "pikotunnel.db"
+
 // GetDB returns the database instance, creating it if necessary
 func GetDB() *gorm.DB {
 	once.Do(func() {
 		var err error
-		db, err = gorm.Open(sqlite.Open("pikotunnel.db"), &gorm.Config{
+		db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		})
 		if err != nil {
