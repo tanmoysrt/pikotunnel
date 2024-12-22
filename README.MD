@@ -3,6 +3,9 @@
 Wireguard based Tunnel to dynamically allocate IP addresses to clients.
 It also allows to write communication rules between peers.
 
+It's just a wrapper around wireguard and iptables to provide simple api to manage wireguard peers and allow to allocate communicatio rules betwwen peers.
+For example, you can add a real user and a container as a peer and then create a rule, so that the user can access the container easily and later you can revoke the access rule as well.
+
 #### API Documentation
 
 Open `apidocs` folder in Bruno to see the API documentation.
