@@ -64,7 +64,7 @@ func GetDB() *gorm.DB {
 			Logger: logger.Default.LogMode(logger.Silent),
 		})
 		if err != nil {
-			panic("failed to connect database")
+			panic("failed to connect database > " + err.Error())
 		}
 
 		// Enable WAL mode
