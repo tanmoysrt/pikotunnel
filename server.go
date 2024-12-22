@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -41,7 +42,12 @@ func startServer() {
 	e.GET("/access-rule/:peer_a_id/:peer_b_id", getAccessRule)
 	e.DELETE("/access-rule/:peer_a_id/:peer_b_id", deleteAccessRule)
 
-	if err := e.Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	serverAddress := os.Getenv("SERVER_ADDRESS")
+	if serverAddress != "" {
+		serverAddress = ":8080"
+	}
+
+	if err := e.Start(serverAddress); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		e.Logger.Fatal(err)
 	}
 	globalWaitGroup.Done()
