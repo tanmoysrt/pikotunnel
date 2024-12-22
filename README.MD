@@ -14,15 +14,27 @@ Open `apidocs` folder in Bruno to see the API documentation.
 
 #### Installation
 
-1. Build the binary
+1. Install Build Dependencies
 
 ```bash
-go build -o pikotunnel .
+# Install gcc and wget
+apt install -y build-essential wget
+
+# Install golang
+wget https://go.dev/dl/go1.23.4.linux-amd64.tar.gz
+rm -rf /usr/local/go && tar -C /usr/local -xzf go1.23.4.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
 ```
 
-2. Move the binary to `/usr/bin`
+2. Build the binary
 
-3. Generate wireguard private key and public key
+```bash
+CGO_ENABLED=1 go build -o pikotunnel .
+```
+
+3. Move the binary to `/usr/bin`
+
+4. Generate wireguard private key and public key
 
 ```bash
 # Generate private key
@@ -32,9 +44,9 @@ wg genkey > wg_private_key
 wg pubkey < wg_private_key > wg_public_key
 ```
 
-4. Create folder in `/home/pikotunnel`
+5. Create folder in `/home/pikotunnel`
 
-5. Write the configuration file `config.json`
+6. Write the configuration file `config.json`
 
 ```json
 {
@@ -47,7 +59,7 @@ wg pubkey < wg_private_key > wg_public_key
 }
 ```
 
-6. Write systemd service file `/etc/systemd/system/pikotunnel.service`
+7. Write systemd service file `/etc/systemd/system/pikotunnel.service`
 
 ```
 [Unit]
@@ -64,9 +76,11 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-7. Enable and start the service
+8. Enable and start the service
 
 ```bash
 systemctl enable pikotunnel.service
 systemctl start pikotunnel.service
 ```
+
+9. Done !

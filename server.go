@@ -43,7 +43,7 @@ func startServer() {
 	e.DELETE("/access-rule/:peer_a_id/:peer_b_id", deleteAccessRule)
 
 	serverAddress := os.Getenv("SERVER_ADDRESS")
-	if serverAddress != "" {
+	if serverAddress == "" {
 		serverAddress = ":8080"
 	}
 

@@ -68,9 +68,10 @@ func initialSetup() {
 
 	// set mtu
 	MTU := os.Getenv("WG_MTU")
-	if MTU != "" {
-		exec.Command("ip", "link", "set", "mtu", MTU, "dev", "wg0").Run()
+	if MTU == "" {
+		MTU = "1420"
 	}
+	exec.Command("ip", "link", "set", "mtu", MTU, "dev", "wg0").Run()
 	log.Println("[DONE] Set mtu of wg0 interface to", MTU)
 
 	// write the private key in a tmp file
