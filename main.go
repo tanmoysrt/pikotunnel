@@ -43,6 +43,7 @@ func main() {
 		go startServer()
 		globalWaitGroup.Add(1)
 		go runWorkers()
+		globalWaitGroup.Wait()
 	}
 }
 
