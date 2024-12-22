@@ -47,7 +47,7 @@ wg pubkey < wg_private_key > wg_public_key
 }
 ```
 
-6. Write systemd service file `pikotunnel.service`
+6. Write systemd service file `/etc/systemd/system/pikotunnel.service`
 
 ```
 [Unit]
@@ -67,6 +67,6 @@ WantedBy=multi-user.target
 7. Enable and start the service
 
 ```bash
-sudo systemctl enable pikotunnel.service
-sudo systemctl start pikotunnel.service
+systemctl enable pikotunnel.service
+systemctl start pikotunnel.service
 ```

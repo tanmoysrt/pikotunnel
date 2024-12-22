@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"sync"
 
 	"gorm.io/driver/sqlite"
@@ -49,6 +50,15 @@ const dbPath = "pikotunnel.db"
 // GetDB returns the database instance, creating it if necessary
 func GetDB() *gorm.DB {
 	once.Do(func() {
+		// Create SQLite database file if it doesn't exist
+		if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+			file, err := os.Create(dbPath)
+			if err != nil {
+				panic(fmt.Sprintf("failed to create database file: %v", err))
+			}
+			file.Close()
+		}
+
 		var err error
 		db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
