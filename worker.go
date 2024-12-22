@@ -1,13 +1,19 @@
 package main
 
-import "log"
+import (
+	"log"
+)
 
 type QueueJob struct {
 	Type string //  peer, access_rule
 	ID   string
 }
 
-var workerQueueChannel = make(chan QueueJob)
+var workerQueueChannel chan QueueJob
+
+func init() {
+	workerQueueChannel = make(chan QueueJob, 20000)
+}
 
 func runWorkers() {
 	process()
@@ -72,10 +78,16 @@ func processPeerDeleting(peer *Peer) {
 			removeIptablesRuleBetweenPeers(peerAIP, peer.IP)
 		}
 		// delete access rule
-		DeleteAccessRule(accessRule.ID)
+		err = DeleteAccessRule(accessRule.ID)
+		if err != nil {
+			log.Printf("[ERROR] Error deleting access rule %s: %s", accessRule.ID, err)
+		}
 	}
 	removeWireguardPeer(peer.PublicKey)
-	DeletePeer(peer.ID)
+	err = DeletePeer(peer.ID)
+	if err != nil {
+		log.Printf("[ERROR] Error deleting peer %s: %s", peer.ID, err)
+	}
 }
 
 func processAccessRule(id string) {
@@ -103,17 +115,17 @@ func processAccessRule(id string) {
 
 func queuePendingTasks() {
 	pendingPeers := []Peer{}
-	err := GetDB().Model(&Peer{}).Where("status = ?", PeerStatusPending).Find(&pendingPeers).Error
+	err := GetDB().Model(&Peer{}).Select("id").Where("status = ?", PeerStatusPending).Find(&pendingPeers).Error
 	if err != nil {
 		panic(err)
 	}
 	deletingPeers := []Peer{}
-	err = GetDB().Model(&Peer{}).Where("status = ?", PeerStatusDeleting).Find(&deletingPeers).Error
+	err = GetDB().Model(&Peer{}).Select("id").Where("status = ?", PeerStatusDeleting).Find(&deletingPeers).Error
 	if err != nil {
 		panic(err)
 	}
 	pendingAccessRules := []AccessRule{}
-	err = GetDB().Model(&AccessRule{}).Where("status = ?", AccessRuleStatusPending).Find(&pendingAccessRules).Error
+	err = GetDB().Model(&AccessRule{}).Select("id").Where("status = ?", AccessRuleStatusPending).Find(&pendingAccessRules).Error
 	if err != nil {
 		panic(err)
 	}

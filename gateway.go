@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -73,9 +74,8 @@ func initialSetup() {
 	tmpFile.WriteString(config.WireguardPrivateKey)
 	tmpFile.Close()
 	log.Println("[DONE] Wrote private key to tmp file")
-
 	// add the private key to the wg0 interface
-	exec.Command("wg", "set", "wg0", "private-key", "/tmp/"+tmpFile.Name()).Run()
+	exec.Command("wg", "set", "wg0", "private-key", tmpFile.Name(), "listen-port", strconv.Itoa(config.WireguardListenPort)).Run()
 	log.Println("[DONE] Added private key to wg0 interface")
 
 	// setup chain
@@ -97,6 +97,7 @@ func prepareServer() {
 	for _, peer := range createdPeers {
 		addWireguardPeer(peer.PublicKey, peer.IP)
 	}
+	log.Println("[DONE] Added wireguard peers")
 
 	// add access rules
 	var createdAccessRules []AccessRule
@@ -107,6 +108,7 @@ func prepareServer() {
 	for _, accessRule := range createdAccessRules {
 		addIptablesRuleBetweenPeers(accessRule.PeerAID, accessRule.PeerBID)
 	}
+	log.Println("[DONE] Added access rules")
 }
 
 func addWireguardPeer(peerPublicKey string, peerWireguardIP string) {

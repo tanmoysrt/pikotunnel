@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"net"
 	"os"
 	"strings"
 )
@@ -10,7 +11,7 @@ import (
 type Config struct {
 	WireguardSubnet              string `json:"wireguard_subnet"`
 	WireguardRelayServerPublicIP string `json:"wireguard_relay_server_public_ip"`
-	WireguardListenPort          uint16 `json:"wireguard_listen_port"`
+	WireguardListenPort          int    `json:"wireguard_listen_port"`
 	WireguardPrivateKey          string `json:"wireguard_private_key"`
 	WireguardPublicKey           string `json:"wireguard_public_key"`
 }
@@ -52,4 +53,12 @@ func loadConfig() {
 
 func (c *Config) GetRelayWireguardAddress() string {
 	return strings.Split(config.WireguardSubnet, "/")[0]
+}
+
+func (c *Config) GetWireguardClientSubnet() string {
+	_, ipnet, err := net.ParseCIDR(c.WireguardSubnet)
+	if err != nil {
+		return ""
+	}
+	return ipnet.String()
 }

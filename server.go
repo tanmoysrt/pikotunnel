@@ -1,12 +1,8 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"net/http"
-	"os"
-	"os/signal"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -33,22 +29,7 @@ func startServer() {
 	e.POST("/access-rule/:peer_a_id/:peer_b_id", createAccessRule)
 	e.GET("/access-rule/:peer_a_id/:peer_b_id", getAccessRule)
 
-	// Handle graceful shutdown
-	go func() {
-		if err := e.Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			e.Logger.Fatal(err)
-		}
-	}()
-
-	// Wait for interrupt signal to gracefully shutdown the server
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-	<-quit
-
-	// Shutdown server with 10 second timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	if err := e.Shutdown(ctx); err != nil {
+	if err := e.Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		e.Logger.Fatal(err)
 	}
 	globalWaitGroup.Done()

@@ -65,7 +65,7 @@ func UpdatePeerStatus(peerID string, status PeerStatus) error {
 }
 
 func DeletePeer(peerID string) error {
-	return GetDB().Delete(&Peer{}, peerID).Error
+	return GetDB().Delete(&Peer{}, "id = ?", peerID).Error
 }
 
 func GetAccessRuleByID(id string) (*AccessRule, error) {
@@ -153,5 +153,5 @@ func UpdateAccessRuleStatus(ruleID string, status AccessRuleStatus) error {
 }
 
 func DeleteAccessRule(ruleID string) error {
-	return GetDB().Delete(&AccessRule{}, ruleID).Error
+	return GetDB().Delete(&AccessRule{}, "id = ?", ruleID).Error
 }

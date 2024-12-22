@@ -99,11 +99,8 @@ setup_wireguard() {
     # Create WireGuard interface
     ip link add "$interface_name" type wireguard
     
-    # Set IP address
-    ip addr add "$INTERFACE_IP" dev "$interface_name"
-    
     # Configure WireGuard with private key
-    wg set "$interface_name" private-key "$temp_key_file"
+    wg set "$interface_name" private-key "$temp_key_file" listen-port 0
     
     # Configure peer
     wg set "$interface_name" peer "$PEER_PUBLIC_KEY" \
@@ -111,6 +108,10 @@ setup_wireguard() {
         endpoint "$ENDPOINT" \
         persistent-keepalive 25
     
+    # Set IP address
+    ip addr add "$INTERFACE_IP" dev "$interface_name"
+
+
     # Bring interface up
     ip link set "$interface_name" up
     
@@ -192,7 +193,7 @@ main "$@"
 
 func (peer *Peer) GenerateWireguardScript() string {
 	wireguardScript := strings.Replace(wireguardScriptTemplate, "{{.PrivateKey}}", peer.PrivateKey, 1)
-	wireguardScript = strings.Replace(wireguardScript, "{{.AllowedIPs}}", config.WireguardSubnet, 1)
+	wireguardScript = strings.Replace(wireguardScript, "{{.AllowedIPs}}", config.GetWireguardClientSubnet(), 1)
 	wireguardScript = strings.Replace(wireguardScript, "{{.PublicKey}}", config.WireguardPublicKey, 1)
 	wireguardScript = strings.Replace(wireguardScript, "{{.WireguardRelayServerPublicIP}}", config.WireguardRelayServerPublicIP, 1)
 	wireguardScript = strings.Replace(wireguardScript, "{{.WireguardListenPort}}", strconv.Itoa(int(config.WireguardListenPort)), 1)
@@ -204,8 +205,9 @@ func (peer *Peer) GetWireguardConfig() map[string]string {
 	return map[string]string{
 		"private_key":      peer.PrivateKey,
 		"public_key":       peer.PublicKey,
-		"ip":               peer.IP + "/32",
-		"allowed_ips":      config.WireguardSubnet,
+		"ip":               peer.IP,
+		"ip_with_mask":     fmt.Sprintf("%s/32", peer.IP),
+		"allowed_ips":      config.GetWireguardClientSubnet(),
 		"relay_public_key": config.WireguardPublicKey,
 		"endpoint":         fmt.Sprintf("%s:%d", config.WireguardRelayServerPublicIP, config.WireguardListenPort),
 	}
